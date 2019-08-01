@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:context="http://www.springframework.org/schema/context" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <context:property-placeholder location="common.properties"/>
+    <flow name="books_poc_main_flow">
+        <file:inbound-endpoint path="${input}" moveToDirectory="${moveto}" responseTimeout="10000" doc:name="File"/>
+        <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        <set-variable variableName="originalPayload" value="#[payload]" doc:name="Set originalPayload Variable"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:input-payload doc:sample="sample_data\empty.xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+(payload.catalog.*book.@id) distinctBy $]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="books_poc_flow">
+        <set-variable variableName="filename" value="#['books' + payload + '.xml']" doc:name="Set filename Variable"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:input-payload doc:sample="sample_data\MyPojo.dwl"/>
+        	<dw:input-variable variableName="originalPayload" mimeType="application/xml" doc:sample="sample_data\empty_1.xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+---
+{
+	catalog:  ((flowVars.originalPayload.catalog.*book) filter ($.@id == payload))
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+        <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+        <file:outbound-endpoint path="${output}" outputPattern="#[flowVars.filename]" responseTimeout="10000" doc:name="File"/>
+    </flow>
+</mule>
