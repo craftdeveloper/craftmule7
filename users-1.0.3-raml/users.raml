@@ -1,0 +1,79 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/4c22da5c-77a8-4992-baab-8bd9e4fbfb01/ # 
+version: v1
+title: users
+
+/user:
+ get:
+   responses:
+     200:
+       body:
+         application/json:
+           example:
+             {"ID":1,
+             "FirstName":"Roza",
+             "LastName":"Jafer",
+             "Department":"MuleSoft"}
+
+/Id:
+ get:
+   responses:
+     200:
+      body:
+        application/json:
+          example:
+           {"ID":1,
+           "FirstName":"Roza",
+           "LastName":"Jafer",
+           "Department":"MuleSoft"}
+
+ delete:
+   body:
+     application/json:
+       example:
+        {"Id": 1}
+  
+   responses:
+    201:
+     body:
+      application/jsone:
+       example:
+         {"msg":"user Deleted"}
+  
+ post:
+   responses:
+     202:
+       body:
+         application/json:
+           example:
+             {"msg":"crated succesful"}
+
+ put:
+   responses:
+     204:
+       body:
+         application/json:
+           example:
+            {"msg":" successfully updated"}
+            
+             
+
+
+  
+
+
+         
+
+
+
+
+
+
+
+
+
+      
+
+
+            
+       
