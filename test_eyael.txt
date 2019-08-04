@@ -1,2 +1,5 @@
 Hi team how r u
 Selam le anchi yihun Ale negni
+Hello EYU good morning. Here is what I read on RAML
+ Introduction
+This specification describes the RESTful API Modeling Language (RAML). RAML is a human- and machine-readable language for the definition of a RESTful application programming interface (API). RAML is designed to improve the specification of the API by providing a format that the API provider and API consumers can use as a mutual contract. RAML can, for example, facilitate providing user documentation and source code stubs for client and server implementations. Such provisions streamline and enhance the definition and development of interoperable applications that utilize RESTful APIs.
