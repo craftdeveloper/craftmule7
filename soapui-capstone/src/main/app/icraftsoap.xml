@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <ws:consumer-config name="Web_Service_Consumer" wsdlLocation="http://api.icraftsoft.net:5858/ws/users.wsdl" service="UserPortService" port="UserPortSoap11" serviceAddress="http://api.icraftsoft.net:5858/ws" doc:name="Web Service Consumer"/>
+    <flow name="icraftsoapFlow-main">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <choice doc:name="Choice">
+            <when expression="#[(message.inboundProperties.'http.method' == 'GET')&amp;&amp;(message.inboundProperties.'http.query.params'.id == null)]">
+                <flow-ref name="GetAllUsers-icraftsoapFlow" doc:name="GetAllUsers"/>
+            </when>
+            <otherwise>
+                <set-payload value="Method not allowed or Payload is empty." doc:name="Set Payload"/>
+            </otherwise>
+        </choice>
+    </flow>
+    <sub-flow name="idVarSubflow">
+        <set-variable variableName="GetUser" value="#[message.inboundProperties.'http.query.params'.id]" doc:name="Variable"/>
+    </sub-flow>
+    <flow name="GetAllUsers-icraftsoapFlow">
+        <ws:consumer config-ref="Web_Service_Consumer" operation="GetAllUsers" doc:name="Web Service Consumer"/>
+    </flow>
+    <flow name="GetUser-icraftsoapFlow">
+        <flow-ref name="idVarSubflow" doc:name="idVarSubflow"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#GetUserRequest: {
+		ns0#id: flowVars.GetUser as :number
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="GetUser" doc:name="Web Service Consumer"/>
+    </flow>
+    <flow name="CreateUser-icraftsoapFlow">
+        <dw:transform-message doc:name="Transform Message" metadata:id="ba0a7ab0-5894-4047-a60f-0322b9c339d0">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#CreateUserRequest: {
+		ns0#CreateUser: {
+			ns0#fist: payload.CreateUser.first,
+			ns0#last: payload.CreateUser.last,
+			ns0#department: payload.CreateUser.department
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="CreateUser" doc:name="Web Service Consumer"/>
+    </flow>
+    <flow name="UpdateUser-icraftsoapFlow">
+        <dw:transform-message doc:name="Transform Message" metadata:id="a370f278-d19a-4165-bd59-85744d12be9b">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#UpdateUserRequest: {
+		ns0#User: {
+			ns0#id: payload.UpdateUser.id as :number,
+			ns0#fist: payload.UpdateUser.first,
+			ns0#last: payload.UpdateUser.last,
+			ns0#department: payload.UpdateUser.department
+		}
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="UpdateUser" doc:name="Web Service Consumer"/>
+    </flow>
+    <flow name="DeleteUser-icraftsoapFlow">
+        <flow-ref name="idVarSubflow" doc:name="idVarSubflow"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.craftsoftware.com/users
+---
+{
+	ns0#DeleteUserRequest: {
+		ns0#id: flowVars.GetUser as :number
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Web_Service_Consumer" operation="DeleteUser" doc:name="Web Service Consumer"/>
+    </flow>
+</mule>
