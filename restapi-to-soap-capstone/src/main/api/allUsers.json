@@ -1,0 +1,14 @@
+[
+	{
+		"id":"1",
+		"first":"Firstname",
+		"last": "Lastname",
+		"department":"department"
+	},
+	{
+		"id":"2",
+		"first":"Firstname",
+		"last": "Lastname",
+		"department":"department"
+	}
+]

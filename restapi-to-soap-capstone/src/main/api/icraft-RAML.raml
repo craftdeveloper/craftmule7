@@ -1,0 +1,58 @@
+#%RAML 0.1
+title: Sample API
+
+/users:
+  get: 
+    description: query all users from backend
+    responses: 
+      200: 
+        body: 
+          application/json: 
+            example: !include allUsers.json
+      400: 
+        body: 
+          application/json: 
+            example: "Bad Request"
+  post: 
+    description: create a user 
+    responses: 
+      201:
+        body: 
+          application/json: 
+            example: !include userNoID.json
+  put: 
+    description: update a user 
+    responses: 
+      200: 
+        body: 
+          application/json: 
+            example: !include user.json
+      400: 
+        body: 
+          application/json: 
+            example: "Bad Request"
+  /{id}:
+    
+    get: 
+      description: query user by id
+      responses: 
+        200: 
+          body: 
+            application/json: 
+              example: !include user.json
+        400: 
+          body: 
+            application/json: 
+              example: "Bad Request"
+    delete:
+      description: delete user 
+      responses: 
+        200: 
+          body: 
+            application/json: 
+              example:  "Successfully Deleted"
+        400: 
+          body: 
+            application/json: 
+              example: "Bad Request"
+    
